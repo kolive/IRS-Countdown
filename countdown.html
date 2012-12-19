@@ -1,0 +1,111 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+      #countdownCanvas {
+        border: 1px solid #9C9898;
+      }
+    </style>
+  </head>
+  <body>
+	<div id='canvas-container' style="margin: 0 auto; width:900px; height: 300px; position: absolute; top:25%; left:25%">
+		<canvas style='margin:auto' id="countdownCanvas" width="900" height="300"></canvas>
+	</div>
+	
+	<script>
+	
+		//date to count down to
+		var end = new Date('02/19/2013 10:1 AM');
+
+		//members used for converting time to different units
+		var _second = 1000;
+		var _minute = _second * 60;
+		var _hour = _minute * 60;
+		var _day = _hour * 24;
+		
+		//member used to store countdown values (days, hours, minutes, seconds)
+		var _currentCountdownValues;
+
+		/*
+			This function generates new countdown values and returns them in an array
+		*/
+		function getCountdownValues() {
+			var now = new Date();
+			
+			//get the time until the new date
+			var distance = end - now;
+			
+			//if the date has occured, return -1
+			if (distance < 0)	return -1;
+			
+			//get the values for day hour minute second
+			var days = Math.floor(distance / _day);
+			var hours = Math.floor((distance % _day) / _hour);
+			var minutes = Math.floor((distance % _hour) / _minute);
+			var seconds = Math.floor((distance % _minute) / _second);
+			
+			//setup return array and return
+			var dateArray = new Array();
+			dateArray[0] = days;
+			dateArray[1] = hours;
+			dateArray[2] = minutes;
+			dateArray[3] = seconds;
+			
+			return dateArray;
+		}
+		
+		//generates the string for the animation frame
+		function updateCountdown()
+		{
+			currentCountdownValues = getCountdownValues();
+			var countdownString = currentCountdownValues[0] + " : " +
+									currentCountdownValues[1] + " : " +
+									currentCountdownValues[2] + " : " +
+									currentCountdownValues[3] + " remains.";
+									
+			var canvas = document.getElementById('countdownCanvas');
+			var context = canvas.getContext('2d');
+			var x = canvas.width / 2;
+			var y = canvas.height / 2;
+			
+			context.textAlign = 'center';
+			context.font = 'italic 40pt Calibri';
+			context.fillText(countdownString , x, y);
+		}
+		
+		
+		//animates the canvas
+		function animate() {
+			var canvas = document.getElementById('countdownCanvas');
+			var context = canvas.getContext('2d');
+
+		
+			// clear the canvas
+			context.clearRect(0, 0, canvas.width, canvas.height);
+
+			// draw the new value of the countdown
+			updateCountdown();
+			
+			// request new frame
+			requestAnimFrame(function() {
+				animate();
+			});
+		}
+	  
+		//sets animation callback (optimizes fps)
+		window.requestAnimFrame = (function(callback) {
+        return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+        function(callback) {
+          window.setTimeout(callback, 1000);
+        };
+      })();
+	  
+		//get first frame
+		animate();
+	</script>
+  </body>
+</html>
