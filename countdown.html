@@ -18,6 +18,65 @@
 	
 	<script>
 	
+		//define a particle object for animation
+		function Particle(){
+			
+			var canvas = document.getElementById('countdownCanvas');
+			var context = canvas.getContext('2d');
+			
+			//public members for acceleration and location
+			this.dx = 1;
+			this.dy = -0.5;
+			this.gravity = 0.1;
+			this.radius = 7;
+			this.curX = 0;
+			this.curY= 0;
+
+			//constructor
+			this.initParticle = function initParticle(dx, dy, radius, curX, curY){
+			
+				this.dx = dx;
+				this.dy = dy;
+				this.radius = radius;
+				this.curX = curX;
+				this.curY = curY;
+				
+			}
+			
+			//draws the next position of the particle
+			this.drawNextPosition = function drawNextPosition()
+			{
+			
+
+				context.beginPath();
+				context.arc(this.curX, this.curY, this.radius, 0, 2 * Math.PI, false);
+				context.lineWidth = 2;
+				context.strokeStyle = '#000000';
+				context.stroke();
+				context.fill();
+				
+				this.curX = this.curX + this.dx;
+				this.curY = this.curY + this.dy;
+				
+				this.dy = this.dy + this.gravity;
+			}
+			
+			//for debugging
+			this.debugAlert = function debugAlert(){
+				alert("Debugging statement: " + this.dx + " " + this.dy + " ."); 
+			}
+			
+			
+			
+		}
+		
+	
+		//particles array 
+		var particles = new Array();
+		
+		//var used to check if it's time to make new particles
+		var lastSecond = "i";
+		
 		//date to count down to
 		var end = new Date('02/19/2013 10:1 AM');
 
@@ -26,6 +85,9 @@
 		var _minute = _second * 60;
 		var _hour = _minute * 60;
 		var _day = _hour * 24;
+		
+		//members used for motion
+		var _gravity = -5;
 		
 		//member used to store countdown values (days, hours, minutes, seconds)
 		var _currentCountdownValues;
@@ -61,6 +123,7 @@
 		//generates the string for the animation frame
 		function updateCountdown()
 		{
+		
 			currentCountdownValues = getCountdownValues();
 			var countdownString = currentCountdownValues[0] + " : " +
 									currentCountdownValues[1] + " : " +
@@ -71,10 +134,38 @@
 			var context = canvas.getContext('2d');
 			var x = canvas.width / 2;
 			var y = canvas.height / 2;
+			var shiftCount = 0;
 			
 			context.textAlign = 'center';
 			context.font = 'italic 40pt Calibri';
 			context.fillText(countdownString , x, y);
+			
+			
+			//generate a new particle if enough time has elapsed
+			if(currentCountdownValues[3] != lastSecond){
+				var tmp;
+				for(var i = 0; i < 10; i++)
+				{
+					tmp = new Particle();
+					tmp.initParticle(1*(Math.random() < 0.5 ? -1 : 1),
+									0.5,
+									1,500+Math.random()*20,
+									150);
+					particles.push(tmp);
+				}
+				lastSecond = currentCountdownValues[3];
+			}
+			
+			
+		
+			//redraw particles
+			for (var i=0;i<particles.length;i++)
+			{ 
+				particles[i].drawNextPosition();
+			}
+				
+			
+		
 		}
 		
 		
@@ -90,6 +181,7 @@
 			// draw the new value of the countdown
 			updateCountdown();
 			
+			
 			// request new frame
 			requestAnimFrame(function() {
 				animate();
@@ -100,12 +192,29 @@
 		window.requestAnimFrame = (function(callback) {
         return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
         function(callback) {
-          window.setTimeout(callback, 1000);
+          window.setTimeout(callback, 1000 / 60);
         };
       })();
 	  
+	  
+	  	
+		
+		
 		//get first frame
 		animate();
+		
+			
+
+		
+		
+		
+		
+		
 	</script>
+	
+	
+	
+	
+	
   </body>
 </html>
